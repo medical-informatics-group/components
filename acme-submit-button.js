@@ -31,7 +31,9 @@ export class AcmeSubmitButton extends HTMLElement {
 
     button.addEventListener('click', () => {
       const form = this.closest('c-form, form');
-      form.submit();
+      form.submit()
+        .then(() => alert('Form submitted!'))
+        .catch(() => alert('Failed to submit form'));
     });
    
     setTimeout(() => {
