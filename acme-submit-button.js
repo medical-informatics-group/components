@@ -33,6 +33,10 @@ export class AcmeSubmitButton extends HTMLElement {
       const form = this.closest('c-form, form');
       form.submit();
     });
+   
+    setTimeout(() => {
+      this.innerHTML = 'Submit';
+    });
   }
 }
 
