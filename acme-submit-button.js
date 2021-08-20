@@ -1,7 +1,7 @@
 /**
-  * An example of a custom web component submit button extending
-  * the native HTMLElement. When clicked it will find and run the
-  * submit method on the closest parent form element.
+  * An example of a custom submit button extending the native HTMLElement. 
+  * When clicked it will find and run the submit method on the closest 
+  * parent c-form element.
   */
 export class AcmeSubmitButton extends HTMLElement {
   constructor() {
