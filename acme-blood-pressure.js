@@ -4,7 +4,7 @@
  * Uses provided helper functions and inheritable classes
  */
 
-const { html, Input, CElement } = window.CComponents
+const { html, Input, CElement } = window.CComponents;
 
 /**
  * Internal component to handle user input
@@ -15,45 +15,45 @@ class AcmeInput extends Input {
     return {
       ...super.properties,
       name: { type: String, reflect: true },
-      placeholder: { type: String }
-    }
+      placeholder: { type: String },
+    };
   }
 
-  #value
+  #value;
 
   get value() {
-    return this.#value
+    return this.#value;
   }
 
   set value(val) {
-    this.#value = val
-    const input = this.shadowRoot.querySelector('input')
+    this.#value = val;
+    const input = this.shadowRoot.querySelector('input');
 
-    input.value = val
+    input.value = val;
   }
 
   get validity() {
-    return super.validity
+    return super.validity;
   }
 
   onInput(event) {
     // Signal element has been touched by user
-    this._removePristine()
+    this._removePristine();
 
-    const oldValue = this.#value
-    const magnitude = Number(event.target.value)
+    const oldValue = this.#value;
+    const magnitude = Number(event.target.value);
 
     if (Number.isFinite(magnitude)) {
       this.#value = {
         magnitude,
-        unit: 'mmHg'
-      }
+        unit: 'mmHg',
+      };
     } else {
-      this.#value = undefined
+      this.#value = undefined;
     }
 
     // Signal value has been updated
-    this.requestUpdate('value', oldValue)
+    this.requestUpdate('value', oldValue);
   }
 
   render() {
@@ -63,11 +63,11 @@ class AcmeInput extends Input {
         type="number"
         @input="${this.onInput}"
       />
-    `
+    `;
   }
 }
 
-customElements.define('acme-input', AcmeInput)
+customElements.define('acme-input', AcmeInput);
 
 /**
  * Exported multi field container component
@@ -78,17 +78,17 @@ export class AcmeBloodPressure extends CElement {
   static get properties() {
     return {
       systolicBinding: {
-        type: String
+        type: String,
       },
       diastolicBinding: {
-        type: String
-      }
-    }
+        type: String,
+      },
+    };
   }
 
   // Open shadow root to expose inner input component form values
   createRenderRoot() {
-    return this
+    return this;
   }
 
   render() {
@@ -102,8 +102,8 @@ export class AcmeBloodPressure extends CElement {
         name="${this.diastolicBinding}"
         placeholder="Diastolic"
       ></acme-input>
-    `
+    `;
   }
 }
 
-customElements.define('acme-blood-pressure', AcmeBloodPressure)
+customElements.define('acme-blood-pressure', AcmeBloodPressure);
