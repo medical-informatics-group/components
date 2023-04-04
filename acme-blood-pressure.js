@@ -46,7 +46,7 @@ class AcmeInput extends Input {
     if (Number.isFinite(magnitude)) {
       this.#value = {
         magnitude,
-        unit: 'mmHg',
+        unit: 'mm[Hg]',
       };
     } else {
       this.#value = undefined;
