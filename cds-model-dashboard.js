@@ -55,21 +55,27 @@ export class CdsModelDashboard extends CElement {
   }
 
   get #positiveLabels() {
-    return (this.positivePredictors || []).map(p => Object.keys(p)[0]);
+    return (this.positivePredictors || []).map(p => p.label);
   }
 
   get #positiveValues() {
-    return (this.positivePredictors || []).map(p => Object.values(p)[0]);
+    return (this.positivePredictors || []).map(p => p.value);
+  }
+
+  get #positiveDescriptions() {
+    return (this.positivePredictors || []).map(p => p.description);
   }
 
   get #negativeLabels() {
-    return (this.negativePredictors || []).map(p => Object.keys(p)[0]);
+    return (this.negativePredictors || []).map(p => p.label);
   }
 
   get #negativeValues() {
-    return (this.negativePredictors || []).map(p =>
-      Math.abs(Object.values(p)[0])
-    );
+    return (this.negativePredictors || []).map(p => Math.abs(p.value));
+  }
+
+  get #negativeDescriptions() {
+    return (this.negativePredictors || []).map(p => p.description);
   }
 
   async #fetch() {
@@ -85,8 +91,8 @@ export class CdsModelDashboard extends CElement {
       try {
         const data = await httpRequest({ url });
 
-        this.positivePredictors = data.positive;
         this.negativePredictors = data.negative;
+        this.positivePredictors = data.positive;
         this.prediction = data.prediction;
         this.modelLabel = data.modelLabel;
       } catch (error) {
@@ -134,7 +140,7 @@ export class CdsModelDashboard extends CElement {
     `;
   }
 
-  render() {
+  #renderBody() {
     return html`
       <c-card>
         <c-section>
@@ -145,18 +151,36 @@ export class CdsModelDashboard extends CElement {
             color="#ffcdd2"
             .values="${this.#positiveValues}"
             .labels="${this.#positiveLabels}"
+            .descriptions="${this.#positiveDescriptions}"
           ></c-barchart>
           <c-barchart
             heading="Minskar sannolikheten"
             color="#bbdefb"
             .values="${this.#negativeValues}"
             .labels="${this.#negativeLabels}"
+            .descriptions="${this.#negativeDescriptions}"
           ></c-barchart>
 
           ${this.#renderOfTotal()}
         </c-section>
       </c-card>
     `;
+  }
+
+  #renderNoData() {
+    return html`
+      <c-card>
+        <p>Ladda patientdata</p>
+      </c-card>
+    `;
+  }
+
+  render() {
+    if (this.prediction !== undefined) {
+      return this.#renderBody();
+    }
+
+    return this.#renderNoData();
   }
 }
 
