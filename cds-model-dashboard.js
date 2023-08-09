@@ -146,20 +146,20 @@ export class CdsModelDashboard extends CElement {
         <c-section>
           ${this.#renderExplanation()}
 
-          <c-barchart
+          <cds-barchart
             heading="Ökar sannolikheten"
             color="#ffcdd2"
             .values="${this.#positiveValues}"
             .labels="${this.#positiveLabels}"
             .descriptions="${this.#positiveDescriptions}"
-          ></c-barchart>
-          <c-barchart
+          ></cds-barchart>
+          <cds-barchart
             heading="Minskar sannolikheten"
             color="#bbdefb"
             .values="${this.#negativeValues}"
             .labels="${this.#negativeLabels}"
             .descriptions="${this.#negativeDescriptions}"
-          ></c-barchart>
+          ></cds-barchart>
 
           ${this.#renderOfTotal()}
         </c-section>
@@ -184,4 +184,154 @@ export class CdsModelDashboard extends CElement {
   }
 }
 
+class CDSBarchart extends CElement {
+  static get styles() {
+    return [
+      ...super.styles,
+      css`
+        :host {
+          --cds-barchart-width: 170px;
+        }
+
+        .chart-container {
+          display: flex;
+          flex-direction: column;
+          gap: 4px;
+          position: relative;
+          height: fit-content;
+          padding: 2px 0;
+        }
+
+        .chart-row {
+          display: flex;
+          flex-direction: row;
+          gap: 4px;
+        }
+
+        .chart-label {
+          width: var(--cds-barchart-width);
+          max-width: var(--cds-barchart-width);
+          word-wrap: break-word;
+        }
+
+        .x-axis {
+          width: 1px;
+          height: 100%;
+          border-left: 2px solid gainsboro;
+          position: absolute;
+          left: calc(var(--cds-barchart-width) + 2px);
+          margin: -2px 0;
+        }
+
+        .empty {
+          border: 1px solid gainsboro;
+        }
+
+        h1 {
+          font-size: medium;
+          margin: 0 0 4px 0;
+        }
+      `
+    ];
+  }
+
+  static get properties() {
+    return {
+      ...super.properties,
+      id: { type: String, reflect: true },
+      heading: { type: String },
+      width: { type: Number, default: 200 },
+      ymax: { type: Number },
+      labels: { type: Array, default: [] },
+      values: { type: Array, default: [] },
+      descriptions: { type: Array, default: [] },
+      color: { type: String, default: 'lightskyblue' },
+      src: { type: String }
+    };
+  }
+
+  updated(props) {
+    if (props.has('src')) {
+      this.#fetch();
+    }
+  }
+
+  async #fetch() {
+    if (this.src) {
+      const response = await fetch(this.src);
+
+      if (response.ok) {
+        const data = await response.json();
+
+        this.labels = data.labels;
+        this.values = data.values;
+      }
+    }
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  renderChartRow(value, label, description) {
+    return html`
+      <div class="chart-row">
+        <c-label
+          class="chart-label"
+          information="${description}"
+          text="${label}"
+        ></c-label>
+        ${this.renderBar(value)}
+      </div>
+    `;
+  }
+
+  renderBar(value) {
+    let ymax = 0;
+    if (this.ymax) {
+      ymax = this.ymax;
+    } else if (this.values.length > 0) {
+      ymax = Math.max(...this.values);
+    }
+
+    const pixels = (value / ymax) * this.width;
+
+    return html`
+      <div
+        style="width: ${pixels}px; height: 20px; background: ${this.color};"
+      ></div>
+    `;
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  renderEmpty() {
+    return html` <div class="empty">No data</div> `;
+  }
+
+  renderHeading() {
+    if (this.heading) {
+      return html` <h1>${this.heading}</h1> `;
+    }
+    return '';
+  }
+
+  render() {
+    if (this.values.length === 0) {
+      return this.renderEmpty();
+    }
+
+    return html`
+      ${this.renderHeading()}
+
+      <div class="chart-container">
+        ${this.values.map((value, index) => {
+          const label = this.labels[index];
+          const description = this.descriptions[index];
+          return this.renderChartRow(value, label, description);
+        })}
+
+        <div class="x-axis"></div>
+      </div>
+    `;
+  }
+}
+
+customElements.define('cds-barchart', CDSBarchart);
 customElements.define('cds-model-dashboard', CdsModelDashboard);
