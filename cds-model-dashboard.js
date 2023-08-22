@@ -6,22 +6,47 @@ export class CdsModelDashboard extends CElement {
       ...super.styles,
       css`
         :host {
-          display: flex;
-          flex-direction: column;
-          gap: 12px;
+          user-select: none;
         }
 
         h1 {
           font-size: x-large;
         }
 
-        c-card:first-child {
-          gap: 4px;
+        P {
+          margin: 0;
+        }
+
+        c-card {
+          display: flex;
+          flex-direction: column;
+          gap: var(--c-gap);
         }
 
         c-indicator {
           padding-top: 4px;
           padding-bottom: 8px;
+        }
+
+        #info-popover-target {
+          color: var(--c-color-primary);
+          font-weight: 700;
+          cursor: pointer;
+          user-select: none;
+          width: fit-content;
+        }
+
+        .info-grid {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: var(--c-gap);
+        }
+
+        footer,
+        header {
+          display: flex;
+          flex-direction: column;
+          gap: calc(var(--c-gap) / 2);
         }
       `
     ];
@@ -35,12 +60,27 @@ export class CdsModelDashboard extends CElement {
       negativePredictors: { type: Object, state: true },
       positivePredictors: { type: Object, state: true },
       prediction: { type: Number, state: true },
+      factorsText: { type: String, localized: true, default: '' },
+      descriptionText: { type: String, localized: true, default: '' },
       limit: { type: Number },
       src: { type: String },
       ehrId: { type: String },
       topPositive: { type: Number },
       topNegative: { type: Number }
     };
+  }
+
+  #popover;
+
+  #popoverTarget;
+
+  firstUpdated() {
+    super.firstUpdated();
+
+    this.#popover = this.shadowRoot.querySelector('c-popover');
+    this.#popoverTarget = this.shadowRoot.querySelector('#info-popover-target');
+
+    this.#popover.anchor = this.#popoverTarget;
   }
 
   updated(props) {
@@ -116,71 +156,97 @@ export class CdsModelDashboard extends CElement {
     return html` <c-label size="s" text="${text}"></c-label> `;
   }
 
-  #renderExplanation() {
+  #renderHeader() {
+    if (this.prediction === undefined) {
+      return '';
+    }
+
     const indicatorVariant = this.modelLabel === 1 ? 'error' : 'success';
     const labelText =
       this.modelLabel === 1
         ? 'Hög risk för återinskrivning'
         : 'Ej hög risk för återinskrivning';
     return html`
-      <c-label
-        text="Predicerad risk för återinskrivning inom 30 dagar"
-      ></c-label>
-      <c-indicator
-        variant="${indicatorVariant}"
-        heading="${labelText}"
-      ></c-indicator>
+      <header>
+        <c-label
+          text="Predicerad risk för återinskrivning inom 30 dagar"
+        ></c-label>
+        <c-indicator
+          variant="${indicatorVariant}"
+          heading="${labelText}"
+        ></c-indicator>
 
-      <p>
-        Nedan visas de faktorer som påverkat modellens analys av den aktuella
-        patienten mest, uppdelat efter om faktorn har bedömts öka eller minska
-        sannolikheten för återinskrivning inom 30 dagar. Klicka på en faktor för
-        mer information.
-      </p>
+        <p>
+          Nedan visas de faktorer som påverkat modellens analys av den aktuella
+          patienten mest, uppdelat efter om faktorn har bedömts öka eller minska
+          sannolikheten för återinskrivning inom 30 dagar. Klicka på en faktor
+          för mer information.
+        </p>
+      </header>
     `;
   }
 
   #renderBody() {
+    if (this.prediction === undefined) {
+      return html` <p>Ingen data</p> `;
+    }
+
     return html`
-      <c-card>
-        <c-section>
-          ${this.#renderExplanation()}
+      <c-barchart
+        heading="Ökar sannolikheten"
+        color="#ffcdd2"
+        .values="${this.#positiveValues}"
+        .labels="${this.#positiveLabels}"
+        .descriptions="${this.#positiveDescriptions}"
+      ></c-barchart>
+      <c-barchart
+        heading="Minskar sannolikheten"
+        color="#bbdefb"
+        .values="${this.#negativeValues}"
+        .labels="${this.#negativeLabels}"
+        .descriptions="${this.#negativeDescriptions}"
+      ></c-barchart>
 
-          <cds-barchart
-            heading="Ökar sannolikheten"
-            color="#ffcdd2"
-            .values="${this.#positiveValues}"
-            .labels="${this.#positiveLabels}"
-            .descriptions="${this.#positiveDescriptions}"
-          ></cds-barchart>
-          <cds-barchart
-            heading="Minskar sannolikheten"
-            color="#bbdefb"
-            .values="${this.#negativeValues}"
-            .labels="${this.#negativeLabels}"
-            .descriptions="${this.#negativeDescriptions}"
-          ></cds-barchart>
-
-          ${this.#renderOfTotal()}
-        </c-section>
-      </c-card>
+      ${this.#renderOfTotal()}
     `;
   }
 
-  #renderNoData() {
+  #renderPopoverContent() {
     return html`
-      <c-card>
-        <p>Ladda patientdata</p>
-      </c-card>
+      <div class="info-grid">
+        <c-text text="${this.factorsText}"></c-text>
+        <c-text text="${this.descriptionText}"></c-text>
+      </div>
+    `;
+  }
+
+  #renderFooter() {
+    return html`
+      <footer>
+        <div>
+          Läs mer om bakomliggande beräkningar och vad prediceringen baseras på
+        </div>
+
+        <div
+          id="info-popover-target"
+          @click=${event => event.stopPropagation()}
+        >
+          Om CDS - Risk för återinskrivning av hjärtsviktspatienter
+        </div>
+
+        <c-popover style="position: fixed" clickopen>
+          ${this.#renderPopoverContent()}
+        </c-popover>
+      </footer>
     `;
   }
 
   render() {
-    if (this.prediction !== undefined) {
-      return this.#renderBody();
-    }
-
-    return this.#renderNoData();
+    return html`
+      <c-card>
+        ${this.#renderHeader()} ${this.#renderBody()} ${this.#renderFooter()}
+      </c-card>
+    `;
   }
 }
 
