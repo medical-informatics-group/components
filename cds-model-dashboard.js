@@ -192,20 +192,20 @@ export class CdsModelDashboard extends CElement {
     }
 
     return html`
-      <c-barchart
+      <cds-barchart
         heading="Ökar sannolikheten"
         color="#ffcdd2"
         .values="${this.#positiveValues}"
         .labels="${this.#positiveLabels}"
         .descriptions="${this.#positiveDescriptions}"
-      ></c-barchart>
-      <c-barchart
+      ></cds-barchart>
+      <cds-barchart
         heading="Minskar sannolikheten"
         color="#bbdefb"
         .values="${this.#negativeValues}"
         .labels="${this.#negativeLabels}"
         .descriptions="${this.#negativeDescriptions}"
-      ></c-barchart>
+      ></cds-barchart>
 
       ${this.#renderOfTotal()}
     `;
