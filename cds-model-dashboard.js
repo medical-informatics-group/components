@@ -36,12 +36,6 @@ export class CdsModelDashboard extends CElement {
           width: fit-content;
         }
 
-        .info-grid {
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: var(--c-gap);
-        }
-
         footer,
         header {
           display: flex;
@@ -60,7 +54,6 @@ export class CdsModelDashboard extends CElement {
       negativePredictors: { type: Object, state: true },
       positivePredictors: { type: Object, state: true },
       prediction: { type: Number, state: true },
-      factorsText: { type: String, localized: true, default: '' },
       descriptionText: { type: String, localized: true, default: '' },
       limit: { type: Number },
       src: { type: String },
@@ -212,12 +205,7 @@ export class CdsModelDashboard extends CElement {
   }
 
   #renderPopoverContent() {
-    return html`
-      <div class="info-grid">
-        <c-text text="${this.factorsText}"></c-text>
-        <c-text text="${this.descriptionText}"></c-text>
-      </div>
-    `;
+    return html`<c-text text="${this.descriptionText}"></c-text>`;
   }
 
   #renderFooter() {
