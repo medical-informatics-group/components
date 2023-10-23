@@ -55,6 +55,7 @@ export class CdsModelDashboard extends CElement {
       positivePredictors: { type: Object, state: true },
       prediction: { type: Number, state: true },
       descriptionText: { type: String, default: '' },
+      error: { type: Boolean, state: true, default: false },
       limit: { type: Number },
       src: { type: String },
       ehrId: { type: String },
@@ -121,6 +122,7 @@ export class CdsModelDashboard extends CElement {
         url += `&topNegative=${this.topNegative}`;
       }
 
+      this.error = false;
       try {
         const data = await httpRequest({ url });
 
@@ -129,6 +131,8 @@ export class CdsModelDashboard extends CElement {
         this.prediction = data.prediction;
         this.modelLabel = data.modelLabel;
       } catch (error) {
+        this.error = true;
+
         this.positivePredictors = undefined;
         this.negativePredictors = undefined;
         this.prediction = undefined;
@@ -180,6 +184,9 @@ export class CdsModelDashboard extends CElement {
   }
 
   #renderBody() {
+    if (this.error === true) {
+      return html`<p>Du har blivit utloggad, prova att ladda om sidan</p>`;
+    }
     if (this.prediction === undefined) {
       return html` <p>Ingen data</p> `;
     }
@@ -232,7 +239,8 @@ export class CdsModelDashboard extends CElement {
   render() {
     return html`
       <c-card>
-        ${this.#renderHeader()} ${this.#renderBody()} ${this.#renderFooter()}
+        ${!this.error ? this.#renderHeader() : ''} ${this.#renderBody()}
+        ${!this.error ? this.#renderFooter() : ''}
       </c-card>
     `;
   }
