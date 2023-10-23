@@ -54,7 +54,7 @@ export class CdsModelDashboard extends CElement {
       negativePredictors: { type: Object, state: true },
       positivePredictors: { type: Object, state: true },
       prediction: { type: Number, state: true },
-      descriptionText: { type: String, localized: true, required: true },
+      descriptionText: { type: String, default: '' },
       limit: { type: Number },
       src: { type: String },
       ehrId: { type: String },
