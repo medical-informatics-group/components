@@ -75,6 +75,8 @@ export class CdsModelDashboard extends CElement {
     this.#popoverTarget = this.shadowRoot.querySelector('#info-popover-target');
 
     this.#popover.anchor = this.#popoverTarget;
+
+    this.#loadFromQueryString();
   }
 
   updated(props) {
@@ -138,6 +140,17 @@ export class CdsModelDashboard extends CElement {
         this.prediction = undefined;
         this.modelLabel = undefined;
       }
+    }
+  }
+
+  #loadFromQueryString() {
+    const url = new URL(window.location.href);
+    const searchParams = url.searchParams;
+
+    const patientId = searchParams.get('patientId');
+
+    if (patientId) {
+      this.ehrId = patientId;
     }
   }
 
