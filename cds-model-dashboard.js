@@ -266,12 +266,14 @@ class CDSBarchart extends CElement {
       css`
         :host {
           --cds-barchart-width: 170px;
+          --cds-barchart-row-height: 32px;
+          --cds-barchart-gap: 4px;
         }
 
         .chart-container {
           display: flex;
           flex-direction: column;
-          gap: 4px;
+          gap: var(--cds-barchart-gap);
           position: relative;
           height: fit-content;
           padding: 2px 0;
@@ -280,7 +282,8 @@ class CDSBarchart extends CElement {
         .chart-row {
           display: flex;
           flex-direction: row;
-          gap: 4px;
+          gap: var(--cds-barchart-gap);
+          height: var(--cds-barchart-row-height);
         }
 
         .chart-label {
