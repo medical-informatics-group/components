@@ -175,7 +175,7 @@ export class CdsModelDashboard extends CElement {
     const labelText =
       this.modelLabel === 1
         ? 'Hög risk för återinskrivning'
-        : 'Ej hög risk för återinskrivning';
+        : 'Låg risk för återinskrivning';
     return html`
       <header>
         <c-label
