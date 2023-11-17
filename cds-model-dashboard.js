@@ -59,8 +59,9 @@ export class CdsModelDashboard extends CElement {
       limit: { type: Number },
       src: { type: String },
       ehrId: { type: String },
-      topPositive: { type: Number },
-      topNegative: { type: Number }
+      cutoff: { type: String },
+      topPositive: { type: Number, default: 5 },
+      topNegative: { type: Number, default: 5 }
     };
   }
 
@@ -84,7 +85,8 @@ export class CdsModelDashboard extends CElement {
       props.has('src') ||
       props.has('ehrId') ||
       props.has('topPositive') ||
-      props.has('topNegative')
+      props.has('topNegative') ||
+      props.has('cutoff')
     ) {
       this.#fetch();
     }
@@ -117,23 +119,39 @@ export class CdsModelDashboard extends CElement {
   async #fetch() {
     if (this.src && this.ehrId !== undefined) {
       let url = `${this.src}?id=${this.ehrId}`;
-      if (this.topPositive) {
-        url += `&topPositive=${this.topPositive}`;
+
+      const cutoff = Number(this.cutoff);
+
+      const topPositive = cutoff ? 20 : this.topPositive;
+      const topNegative = cutoff ? 20 : this.topNegative;
+
+      if (topPositive) {
+        url += `&topPositive=${topPositive}`;
       }
-      if (this.topNegative) {
-        url += `&topNegative=${this.topNegative}`;
+      if (topNegative) {
+        url += `&topNegative=${topNegative}`;
       }
 
       this.error = false;
       try {
         const data = await httpRequest({ url });
 
-        this.negativePredictors = data.negative;
-        this.positivePredictors = data.positive;
+        let negative = data.negative || [];
+        let positive = data.positive || [];
+
+        if (cutoff) {
+          negative = negative.filter(d => Math.abs(d.value) >= cutoff);
+          positive = positive.filter(d => d.value >= cutoff);
+        }
+
+        this.negativePredictors = negative;
+        this.positivePredictors = positive;
         this.prediction = data.prediction;
         this.modelLabel = data.modelLabel;
       } catch (error) {
         this.error = true;
+
+        console.error(error);
 
         this.positivePredictors = undefined;
         this.negativePredictors = undefined;
