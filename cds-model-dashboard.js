@@ -226,6 +226,7 @@ export class CdsModelDashboard extends CElement {
       <cds-barchart
         heading="Ökar sannolikheten"
         color="#ffcdd2"
+        emptytext="Ingen data för positiva faktorer"
         .values="${this.#positiveValues}"
         .labels="${this.#positiveLabels}"
         .descriptions="${this.#positiveDescriptions}"
@@ -233,6 +234,7 @@ export class CdsModelDashboard extends CElement {
       <cds-barchart
         heading="Minskar sannolikheten"
         color="#bbdefb"
+        emptytext="Ingen data för negativa faktorer"
         .values="${this.#negativeValues}"
         .labels="${this.#negativeLabels}"
         .descriptions="${this.#negativeDescriptions}"
@@ -342,7 +344,8 @@ class CDSBarchart extends CElement {
       values: { type: Array, default: [] },
       descriptions: { type: Array, default: [] },
       color: { type: String, default: 'lightskyblue' },
-      src: { type: String }
+      src: { type: String },
+      emptytext: { type: String, default: 'No data' }
     };
   }
 
@@ -398,7 +401,7 @@ class CDSBarchart extends CElement {
 
   // eslint-disable-next-line class-methods-use-this
   renderEmpty() {
-    return html` <div class="empty">No data</div> `;
+    return html` <div class="empty">${this.emptytext}</div> `;
   }
 
   renderHeading() {
